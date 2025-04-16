@@ -155,6 +155,10 @@ namespace UserPermissionSystem.Domain.Entities
         // 验证密码
         public bool VerifyPassword(string password)
         {
+            // 添加空值检查防止空引用异常
+            if (_password == null)
+                return false;
+            
             return _password.VerifyPassword(password);
         }
 

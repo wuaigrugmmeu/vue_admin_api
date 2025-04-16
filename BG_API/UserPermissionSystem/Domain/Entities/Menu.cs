@@ -16,7 +16,7 @@ namespace UserPermissionSystem.Domain.Entities
         public string Icon { get; private set; } = string.Empty;
         public int? ParentId { get; private set; }
         public int Order { get; private set; }
-        public string PermissionCode { get; private set; } = string.Empty;
+        public string? PermissionCode { get; private set; } = string.Empty; // 修改为可空类型
         public bool IsVisible { get; private set; } = true;
         
         public Menu Parent { get; private set; }
@@ -37,7 +37,7 @@ namespace UserPermissionSystem.Domain.Entities
             string icon, 
             int? parentId, 
             int order, 
-            string permissionCode, 
+            string? permissionCode, 
             bool isVisible)
         {
             ValidateName(name);
@@ -51,7 +51,7 @@ namespace UserPermissionSystem.Domain.Entities
                 Icon = icon ?? string.Empty,
                 ParentId = parentId,
                 Order = order,
-                PermissionCode = permissionCode ?? string.Empty,
+                PermissionCode = permissionCode, // 修改：保留null值，不再转换为空字符串
                 IsVisible = isVisible
             };
             
@@ -69,7 +69,7 @@ namespace UserPermissionSystem.Domain.Entities
             string icon, 
             int? parentId, 
             int order, 
-            string permissionCode, 
+            string? permissionCode, 
             bool isVisible)
         {
             return new Menu
@@ -81,7 +81,7 @@ namespace UserPermissionSystem.Domain.Entities
                 Icon = icon ?? string.Empty,
                 ParentId = parentId,
                 Order = order,
-                PermissionCode = permissionCode ?? string.Empty,
+                PermissionCode = permissionCode, // 修改：保留null值，不再转换为空字符串
                 IsVisible = isVisible
             };
         }
@@ -94,7 +94,7 @@ namespace UserPermissionSystem.Domain.Entities
             string icon, 
             int? parentId, 
             int order, 
-            string permissionCode, 
+            string? permissionCode, 
             bool isVisible)
         {
             ValidateName(name);
@@ -110,7 +110,7 @@ namespace UserPermissionSystem.Domain.Entities
             Icon = icon ?? string.Empty;
             ParentId = parentId;
             Order = order;
-            PermissionCode = permissionCode ?? string.Empty;
+            PermissionCode = permissionCode; // 修改：保留null值，不再转换为空字符串
             IsVisible = isVisible;
             
             AddDomainEvent(new MenuUpdatedDomainEvent(Id, Name));

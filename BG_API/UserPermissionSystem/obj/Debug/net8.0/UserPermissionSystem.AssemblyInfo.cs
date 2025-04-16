@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UserPermissionSystem")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d233779e9cb8c7edf4e794039b82f7acbb615f47")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6e4e1b4f22ea8afe7f1a72d415e48c95be6eca8c")]
 [assembly: System.Reflection.AssemblyProductAttribute("UserPermissionSystem")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UserPermissionSystem")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

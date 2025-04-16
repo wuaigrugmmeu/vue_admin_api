@@ -18,10 +18,22 @@ namespace UserPermissionSystem.Infrastructure.Seeders
                 return; // 已经初始化过，不再重复
             }
 
+            // 确保按正确的顺序添加数据：
+            // 1. 先添加权限（Permissions）
+            // 2. 再添加角色（Roles）并分配权限
+            // 3. 然后添加用户（Users）并分配角色
+            // 4. 最后添加菜单（Menus），因为它们依赖于权限
             await SeedPermissionsAsync(dbContext);
+            await dbContext.SaveChangesAsync();
+            
             await SeedRolesAsync(dbContext);
+            await dbContext.SaveChangesAsync();
+            
             await SeedUsersAsync(dbContext);
+            await dbContext.SaveChangesAsync();
+            
             await SeedMenusAsync(dbContext);
+            await dbContext.SaveChangesAsync();
         }
 
         private static async Task SeedPermissionsAsync(AppDbContext dbContext)
@@ -101,8 +113,14 @@ namespace UserPermissionSystem.Infrastructure.Seeders
 
         private static async Task SeedUsersAsync(AppDbContext dbContext)
         {
-            // 创建初始管理员用户
-            var adminUser = User.Create("admin", "admin123", "admin@example.com");
+            // 创建初始管理员用户 - 添加电话号码参数
+            var adminUser = User.Create(
+                userName: "admin", 
+                password: "admin123", 
+                email: "admin@example.com", 
+                displayName: "系统管理员",  // 添加显示名称
+                phoneNumber: "13800000000" // 添加电话号码
+            );
             
             await dbContext.Users.AddAsync(adminUser);
             await dbContext.SaveChangesAsync();
@@ -134,7 +152,7 @@ namespace UserPermissionSystem.Infrastructure.Seeders
                     icon: "setting", 
                     parentId: null, 
                     order: 1, 
-                    permissionCode: "", 
+                    permissionCode: null,  // 修改为null，而不是空字符串
                     isVisible: true)
             };
 

@@ -60,7 +60,8 @@ namespace UserPermissionSystem.Infrastructure.Persistence
             modelBuilder.Entity<Menu>()
                 .HasOne(m => m.Permission)
                 .WithMany(p => p.Menus)
-                .HasForeignKey(m => m.PermissionCode);
+                .HasForeignKey(m => m.PermissionCode)
+                .IsRequired(false); // 修改为允许PermissionCode为空
         }
     }
 }
