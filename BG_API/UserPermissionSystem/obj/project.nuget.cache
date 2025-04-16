@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "T4YRQ4S++cQ=",
+  "dgSpecHash": "la/5LIp9oAo=",
   "success": true,
-  "projectFilePath": "/Users/pengjie/Dev/vue_admin_api-main_副本/BG_API/UserPermissionSystem/UserPermissionSystem.csproj",
+  "projectFilePath": "/Users/pengjie/Dev/vue_admin_api-main/BG_API/UserPermissionSystem/UserPermissionSystem.csproj",
   "expectedPackageFiles": [
     "/Users/pengjie/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/pengjie/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/8.0.0/microsoft.aspnetcore.authentication.jwtbearer.8.0.0.nupkg.sha512",

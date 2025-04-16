@@ -38,9 +38,11 @@ namespace UserPermissionSystem.Infrastructure.Services
                 return null;
 
             // 获取用户
-            var user = await _dbContext.Users
+            var userDto = await _dbContext.Users
                 .AsNoTracking()
-                .Select(u => User.Load(
+                .Where(u => u.UserName == userName && u.IsActive)
+                .Select(u => new 
+                {
                     u.Id,
                     u.UserName,
                     u.PasswordHash,
@@ -49,11 +51,23 @@ namespace UserPermissionSystem.Infrastructure.Services
                     u.CreatedAt,
                     u.UpdatedAt,
                     u.DisplayName,
-                    u.PhoneNumber))
-                .FirstOrDefaultAsync(u => u.UserName == userName && u.IsActive);
+                    u.PhoneNumber
+                })
+                .FirstOrDefaultAsync();
 
-            if (user == null)
+            if (userDto == null)
                 return null;
+
+            var user = User.Load(
+                userDto.Id,
+                userDto.UserName,
+                userDto.PasswordHash,
+                userDto.Email,
+                userDto.IsActive,
+                userDto.CreatedAt,
+                userDto.UpdatedAt,
+                userDto.DisplayName,
+                userDto.PhoneNumber);
 
             // 验证密码
             return user.VerifyPassword(password) ? user : null;
