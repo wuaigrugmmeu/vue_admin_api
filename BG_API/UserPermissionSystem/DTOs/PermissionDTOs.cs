@@ -1,8 +1,15 @@
 using System.Collections.Generic;
-using UserPermissionSystem.Models;
 
 namespace UserPermissionSystem.DTOs
 {
+    public enum PermissionType
+    {
+        Menu = 0,
+        Button = 1,
+        Api = 2,
+        Element = 3
+    }
+
     public class PermissionDto
     {
         public string Code { get; set; } = string.Empty;

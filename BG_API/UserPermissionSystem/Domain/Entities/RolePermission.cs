@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace UserPermissionSystem.Models
+namespace UserPermissionSystem.Domain.Entities
 {
     public class RolePermission
     {

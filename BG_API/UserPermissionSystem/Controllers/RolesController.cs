@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UserPermissionSystem.Data;
+using UserPermissionSystem.Infrastructure.Persistence;
 using UserPermissionSystem.DTOs;
-using UserPermissionSystem.Models;
+using UserPermissionSystem.Domain.Entities;
 
 namespace UserPermissionSystem.Controllers
 {
@@ -112,13 +112,11 @@ namespace UserPermissionSystem.Controllers
                 return BadRequest(new { message = "角色名已存在" });
             }
 
-            // 创建新角色
-            var role = new Role
-            {
-                Name = createRoleDto.Name,
-                Description = createRoleDto.Description,
-                CreatedAt = DateTime.UtcNow
-            };
+            // 使用Role实体的工厂方法创建新角色
+            var role = Role.Create(
+                createRoleDto.Name,
+                createRoleDto.Description
+            );
 
             _context.Roles.Add(role);
             await _context.SaveChangesAsync();
@@ -126,20 +124,12 @@ namespace UserPermissionSystem.Controllers
             // 如果提供了权限，则分配权限
             if (createRoleDto.PermissionCodes != null && createRoleDto.PermissionCodes.Any())
             {
-                var validPermissionCodes = await _context.Permissions
+                var permissions = await _context.Permissions
                     .Where(p => createRoleDto.PermissionCodes.Contains(p.Code))
-                    .Select(p => p.Code)
                     .ToListAsync();
 
-                foreach (var code in validPermissionCodes)
-                {
-                    _context.RolePermissions.Add(new RolePermission
-                    {
-                        RoleId = role.Id,
-                        PermissionCode = code
-                    });
-                }
-
+                role.AssignPermissions(permissions);
+                
                 await _context.SaveChangesAsync();
             }
 
@@ -163,10 +153,8 @@ namespace UserPermissionSystem.Controllers
                 return BadRequest(new { message = "角色名已存在" });
             }
 
-            // 更新角色信息
-            role.Name = updateRoleDto.Name;
-            role.Description = updateRoleDto.Description;
-            role.UpdatedAt = DateTime.UtcNow;
+            // 更新角色信息，使用Role实体的Update方法
+            role.Update(updateRoleDto.Name, updateRoleDto.Description);
             
             await _context.SaveChangesAsync();
 
@@ -203,26 +191,21 @@ namespace UserPermissionSystem.Controllers
                 return NotFound(new { message = "角色不存在" });
             }
 
-            // 验证权限是否存在
-            var validPermissionCodes = await _context.Permissions
+            // 获取指定的权限
+            var permissions = await _context.Permissions
                 .Where(p => permissionAssignmentDto.PermissionCodes.Contains(p.Code))
-                .Select(p => p.Code)
                 .ToListAsync();
 
-            // 清除现有权限分配
-            _context.RolePermissions.RemoveRange(role.RolePermissions);
-
-            // 添加新的权限分配
-            foreach (var code in validPermissionCodes)
+            // 先清除角色的所有现有权限
+            var currentPermissionCodes = role.RolePermissions.Select(rp => rp.PermissionCode).ToList();
+            foreach (var code in currentPermissionCodes)
             {
-                _context.RolePermissions.Add(new RolePermission
-                {
-                    RoleId = role.Id,
-                    PermissionCode = code
-                });
+                role.RemovePermission(code);
             }
 
-            role.UpdatedAt = DateTime.UtcNow;
+            // 重新分配新的权限
+            role.AssignPermissions(permissions);
+
             await _context.SaveChangesAsync();
 
             return NoContent();

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UserPermissionSystem.Data;
+using UserPermissionSystem.Infrastructure.Persistence;
 using UserPermissionSystem.DTOs;
-using UserPermissionSystem.Models;
+using UserPermissionSystem.Domain.Entities;
 
 namespace UserPermissionSystem.Controllers
 {
@@ -28,9 +28,7 @@ namespace UserPermissionSystem.Controllers
         [Authorize(Policy = "RequirePermission:menu:list")]
         public async Task<ActionResult<IEnumerable<MenuDto>>> GetMenus()
         {
-            var menus = await _context.Menus
-                .Include(m => m.Permission)
-                .ToListAsync();
+            var menus = await _context.Menus.ToListAsync();
 
             var menuDtos = menus.Select(m => new MenuDto
             {
@@ -53,7 +51,6 @@ namespace UserPermissionSystem.Controllers
         public async Task<ActionResult<List<MenuDto>>> GetMenuTree()
         {
             var menus = await _context.Menus
-                .Include(m => m.Permission)
                 .OrderBy(m => m.Order)
                 .ToListAsync();
 
@@ -107,8 +104,7 @@ namespace UserPermissionSystem.Controllers
 
             // 获取用户有权访问的所有菜单
             var visibleMenus = await _context.Menus
-                .Include(m => m.Permission)
-                .Where(m => m.IsVisible && (m.PermissionCode == null || permissionCodes.Contains(m.PermissionCode)))
+                .Where(m => m.IsVisible && (string.IsNullOrEmpty(m.PermissionCode) || permissionCodes.Contains(m.PermissionCode)))
                 .OrderBy(m => m.Order)
                 .ToListAsync();
 
@@ -136,7 +132,6 @@ namespace UserPermissionSystem.Controllers
         public async Task<ActionResult<MenuDto>> GetMenu(int id)
         {
             var menu = await _context.Menus
-                .Include(m => m.Permission)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (menu == null)
@@ -184,18 +179,17 @@ namespace UserPermissionSystem.Controllers
                 }
             }
 
-            // 创建新菜单
-            var menu = new Menu
-            {
-                Name = createMenuDto.Name,
-                Path = createMenuDto.Path,
-                ComponentPath = createMenuDto.ComponentPath,
-                Icon = createMenuDto.Icon,
-                ParentId = createMenuDto.ParentId,
-                Order = createMenuDto.Order,
-                PermissionCode = createMenuDto.PermissionCode,
-                IsVisible = createMenuDto.IsVisible
-            };
+            // 使用Menu实体的工厂方法创建新菜单
+            var menu = Menu.Create(
+                createMenuDto.Name,
+                createMenuDto.Path,
+                createMenuDto.ComponentPath,
+                createMenuDto.Icon,
+                createMenuDto.ParentId,
+                createMenuDto.Order,
+                createMenuDto.PermissionCode,
+                createMenuDto.IsVisible
+            );
 
             _context.Menus.Add(menu);
             await _context.SaveChangesAsync();
@@ -259,15 +253,17 @@ namespace UserPermissionSystem.Controllers
                 }
             }
 
-            // 更新菜单
-            menu.Name = updateMenuDto.Name;
-            menu.Path = updateMenuDto.Path;
-            menu.ComponentPath = updateMenuDto.ComponentPath;
-            menu.Icon = updateMenuDto.Icon;
-            menu.ParentId = updateMenuDto.ParentId;
-            menu.Order = updateMenuDto.Order;
-            menu.PermissionCode = updateMenuDto.PermissionCode;
-            menu.IsVisible = updateMenuDto.IsVisible;
+            // 使用Menu实体的Update方法更新菜单
+            menu.Update(
+                updateMenuDto.Name,
+                updateMenuDto.Path,
+                updateMenuDto.ComponentPath,
+                updateMenuDto.Icon,
+                updateMenuDto.ParentId,
+                updateMenuDto.Order,
+                updateMenuDto.PermissionCode,
+                updateMenuDto.IsVisible
+            );
 
             await _context.SaveChangesAsync();
 

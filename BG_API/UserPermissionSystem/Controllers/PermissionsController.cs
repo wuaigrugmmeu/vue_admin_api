@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UserPermissionSystem.Data;
+using UserPermissionSystem.Infrastructure.Persistence;
 using UserPermissionSystem.DTOs;
-using UserPermissionSystem.Models;
+using UserPermissionSystem.Domain.Entities;
 
 namespace UserPermissionSystem.Controllers
 {
@@ -34,7 +34,7 @@ namespace UserPermissionSystem.Controllers
                 Name = p.Name,
                 Description = p.Description,
                 Module = p.Module,
-                Type = p.Type
+                Type = ConvertToDto(p.Type)
             }).ToList();
 
             return Ok(permissionDtos);
@@ -57,13 +57,27 @@ namespace UserPermissionSystem.Controllers
                         Name = p.Name,
                         Description = p.Description,
                         Module = p.Module,
-                        Type = p.Type
+                        Type = ConvertToDto(p.Type)
                     }).ToList()
                 })
                 .OrderBy(g => g.Module)
                 .ToList();
 
             return Ok(groupedPermissions);
+        }
+        
+        /// <summary>
+        /// 将领域模型的PermissionType转换为DTO的PermissionType
+        /// </summary>
+        private static DTOs.PermissionType ConvertToDto(Domain.Entities.PermissionType type)
+        {
+            return type switch
+            {
+                Domain.Entities.PermissionType.Api => DTOs.PermissionType.Api,
+                Domain.Entities.PermissionType.Menu => DTOs.PermissionType.Menu,
+                Domain.Entities.PermissionType.Button => DTOs.PermissionType.Button,
+                _ => DTOs.PermissionType.Api  // 默认值
+            };
         }
     }
 }

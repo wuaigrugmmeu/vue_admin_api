@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UserPermissionSystem.Data;
+using UserPermissionSystem.Infrastructure.Persistence;
 using UserPermissionSystem.DTOs;
-using UserPermissionSystem.Models;
-using UserPermissionSystem.Services;
+using UserPermissionSystem.Domain.Entities;
+using UserPermissionSystem.Application.Interfaces;
 
 namespace UserPermissionSystem.Controllers
 {
@@ -123,15 +123,14 @@ namespace UserPermissionSystem.Controllers
                 return BadRequest(new { message = "用户名已存在" });
             }
 
-            // 创建新用户
-            var user = new User
-            {
-                UserName = createUserDto.Username,
-                PasswordHash = HashPassword(createUserDto.Password),
-                Email = createUserDto.Email ?? string.Empty,
-                IsActive = createUserDto.IsActive,
-                CreatedAt = DateTime.UtcNow
-            };
+            // 使用User实体的工厂方法创建用户
+            var user = UserPermissionSystem.Domain.Entities.User.Create(
+                createUserDto.Username, 
+                createUserDto.Password, 
+                createUserDto.Email ?? string.Empty,
+                null, // displayName 使用默认值
+                null  // phoneNumber 使用默认值
+            );
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -139,18 +138,13 @@ namespace UserPermissionSystem.Controllers
             // 如果提供了角色，则分配角色
             if (createUserDto.RoleIds != null && createUserDto.RoleIds.Any())
             {
-                var validRoleIds = await _context.Roles
+                var roles = await _context.Roles
                     .Where(r => createUserDto.RoleIds.Contains(r.Id))
-                    .Select(r => r.Id)
                     .ToListAsync();
 
-                foreach (var roleId in validRoleIds)
+                foreach (var role in roles)
                 {
-                    _context.UserRoles.Add(new UserRole
-                    {
-                        UserId = user.Id,
-                        RoleId = roleId
-                    });
+                    user.AssignRole(role);
                 }
 
                 await _context.SaveChangesAsync();
@@ -170,18 +164,26 @@ namespace UserPermissionSystem.Controllers
                 return NotFound(new { message = "用户不存在" });
             }
 
-            // 更新用户信息
-            if (updateUserDto.Email != null)
-            {
-                user.Email = updateUserDto.Email;
-            }
+            // 更新用户信息，使用User实体方法
+            user.UpdateInfo(
+                updateUserDto.Email ?? user.Email, // 如果没有提供新值，则保留原值
+                null, // displayName 保持原值
+                null  // phoneNumber 保持原值
+            );
 
+            // 更新用户状态
             if (updateUserDto.IsActive.HasValue)
             {
-                user.IsActive = updateUserDto.IsActive.Value;
+                if (updateUserDto.IsActive.Value)
+                {
+                    user.Activate();
+                }
+                else
+                {
+                    user.Deactivate();
+                }
             }
 
-            user.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -217,26 +219,24 @@ namespace UserPermissionSystem.Controllers
                 return NotFound(new { message = "用户不存在" });
             }
 
-            // 验证角色是否存在
-            var validRoleIds = await _context.Roles
+            // 获取所有要分配的角色
+            var roles = await _context.Roles
                 .Where(r => roleAssignmentDto.RoleIds.Contains(r.Id))
-                .Select(r => r.Id)
                 .ToListAsync();
 
-            // 清除现有角色分配
-            _context.UserRoles.RemoveRange(user.UserRoles);
-
-            // 添加新的角色分配
-            foreach (var roleId in validRoleIds)
+            // 清除现有角色（首先获取当前用户的所有角色ID）
+            var currentRoleIds = user.UserRoles.Select(ur => ur.RoleId).ToList();
+            foreach (var roleId in currentRoleIds)
             {
-                _context.UserRoles.Add(new UserRole
-                {
-                    UserId = user.Id,
-                    RoleId = roleId
-                });
+                user.RemoveRole(roleId);
             }
 
-            user.UpdatedAt = DateTime.UtcNow;
+            // 添加新的角色
+            foreach (var role in roles)
+            {
+                user.AssignRole(role);
+            }
+
             await _context.SaveChangesAsync();
 
             return NoContent();

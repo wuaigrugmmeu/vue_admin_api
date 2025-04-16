@@ -3,8 +3,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UserPermissionSystem.Application.Commands;
+using UserPermissionSystem.Application.Interfaces;
 using UserPermissionSystem.DTOs;
-using UserPermissionSystem.Services;
 
 namespace UserPermissionSystem.Controllers
 {
@@ -29,7 +30,7 @@ namespace UserPermissionSystem.Controllers
                 return BadRequest(new { message = result.Message });
             }
 
-            return Ok(result.Data);
+            return Ok(result);
         }
 
         [Authorize]
@@ -73,7 +74,6 @@ namespace UserPermissionSystem.Controllers
             return Ok(new { message = result.Message });
         }
         
-        // 添加系统自检接口，用于验证密码哈希
         [HttpGet("system-check")]
         public IActionResult SystemCheck()
         {
@@ -83,7 +83,7 @@ namespace UserPermissionSystem.Controllers
                 var password = "admin123";
                 var hashedBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 var hash = Convert.ToBase64String(hashedBytes);
-                var expectedHash = "qnR8UCqJggD55PohusaBNviGoOJ67HC6Btry4qXLVZc=";
+                var expectedHash = "JAvlGPq9JyTdtvBO6x2llnRI1+gxwIyPqCKAn3THIKk=";
                 
                 var isMatching = hash == expectedHash;
                 

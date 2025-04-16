@@ -1,4 +1,4 @@
-namespace UserPermissionSystem.Models
+namespace UserPermissionSystem.Infrastructure.Authentication
 {
     public class JwtSettings
     {
