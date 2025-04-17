@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserPermissionSystem.Domain.Entities;
+using UserPermissionSystem.Domain.Aggregates.UserAggregate;
+using UserPermissionSystem.Domain.Aggregates.RoleAggregate;
 using UserPermissionSystem.Infrastructure.Persistence;
 
 namespace UserPermissionSystem.Infrastructure.Seeders
@@ -75,7 +77,7 @@ namespace UserPermissionSystem.Infrastructure.Seeders
         private static async Task SeedRolesAsync(AppDbContext dbContext)
         {
             // 创建管理员角色
-            var adminRole = Role.Create("管理员", "系统管理员，拥有所有权限");
+            var adminRole = Domain.Aggregates.RoleAggregate.Role.Create("管理员", "系统管理员，拥有所有权限");
             
             await dbContext.Roles.AddAsync(adminRole);
             await dbContext.SaveChangesAsync();
@@ -92,7 +94,7 @@ namespace UserPermissionSystem.Infrastructure.Seeders
             }
 
             // 创建普通用户角色
-            var userRole = Role.Create("普通用户", "普通用户，拥有基本权限");
+            var userRole = Domain.Aggregates.RoleAggregate.Role.Create("普通用户", "普通用户，拥有基本权限");
             
             await dbContext.Roles.AddAsync(userRole);
             await dbContext.SaveChangesAsync();
@@ -114,7 +116,7 @@ namespace UserPermissionSystem.Infrastructure.Seeders
         private static async Task SeedUsersAsync(AppDbContext dbContext)
         {
             // 创建初始管理员用户
-            var adminUser = User.Create(
+            var adminUser = Domain.Aggregates.UserAggregate.User.Create(
                 userName: "admin", 
                 password: "admin123", 
                 email: "admin@example.com", 
@@ -132,7 +134,8 @@ namespace UserPermissionSystem.Infrastructure.Seeders
             var adminRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == "管理员");
             if (adminRole != null)
             {
-                adminUser.AssignRole(adminRole);
+                // 使用 AssignRoleById 方法，避免类型转换问题
+                adminUser.AssignRoleById(adminRole.Id);
                 await dbContext.SaveChangesAsync();
             }
         }

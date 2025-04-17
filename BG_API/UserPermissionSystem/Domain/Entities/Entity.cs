@@ -4,7 +4,7 @@ using UserPermissionSystem.Domain.Events;
 
 namespace UserPermissionSystem.Domain.Entities
 {
-    public abstract class Entity
+    public abstract class Entity : BaseEntity
     {
         private List<DomainEvent> _domainEvents;
         public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents?.AsReadOnly();

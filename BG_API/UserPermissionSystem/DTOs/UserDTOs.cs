@@ -30,6 +30,10 @@ namespace UserPermissionSystem.DTOs
         public string? Email { get; set; }
 
         public bool? IsActive { get; set; }
+        
+        // 添加RowVersion属性用于并发控制
+        [Required]
+        public byte[] RowVersion { get; set; }
     }
 
     public class UserRoleAssignmentDto
@@ -47,6 +51,8 @@ namespace UserPermissionSystem.DTOs
         public string CreatedAt { get; set; } = string.Empty;
         public string? UpdatedAt { get; set; }
         public List<RoleDto> Roles { get; set; } = new List<RoleDto>();
+        // 添加RowVersion属性用于并发控制
+        public byte[] RowVersion { get; set; }
     }
 
     public class UserListDto

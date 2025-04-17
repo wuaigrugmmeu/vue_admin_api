@@ -271,3 +271,10 @@
 /Users/pengjie/Dev/vue_admin_api-main/BG_API/UserPermissionSystem/obj/Debug/net8.0/UserPermissionSystem.pdb
 /Users/pengjie/Dev/vue_admin_api-main/BG_API/UserPermissionSystem/obj/Debug/net8.0/UserPermissionSystem.genruntimeconfig.cache
 /Users/pengjie/Dev/vue_admin_api-main/BG_API/UserPermissionSystem/obj/Debug/net8.0/ref/UserPermissionSystem.dll
+/workspaces/vue_admin_api/BG_API/UserPermissionSystem/bin/Debug/net8.0/Microsoft.Extensions.Caching.Abstractions.dll
+/workspaces/vue_admin_api/BG_API/UserPermissionSystem/bin/Debug/net8.0/Microsoft.Extensions.Caching.Memory.dll
+/workspaces/vue_admin_api/BG_API/UserPermissionSystem/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/workspaces/vue_admin_api/BG_API/UserPermissionSystem/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
+/workspaces/vue_admin_api/BG_API/UserPermissionSystem/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
+/workspaces/vue_admin_api/BG_API/UserPermissionSystem/bin/Debug/net8.0/Microsoft.Extensions.Primitives.dll
+/workspaces/vue_admin_api/BG_API/UserPermissionSystem/bin/Debug/net8.0/System.Diagnostics.DiagnosticSource.dll

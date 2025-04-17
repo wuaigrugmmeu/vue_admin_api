@@ -1,0 +1,1 @@
+# 服务层重构建议\n\n## AuthService重构\n\n- 保留Application/Services/AuthService作为唯一实现\n- 移除Infrastructure/Services/AuthService\n- 确保在Program.cs中只注册一次AuthService\n\n## 领域服务和应用服务职责明确\n\n- AuthDomainService负责领域逻辑和密码验证\n- AuthService负责应用层逻辑，如生成令牌、查询用户信息等

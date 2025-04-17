@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using UserPermissionSystem.Domain.Entities;
 using UserPermissionSystem.Domain.Events;
+using UserPermissionSystem.Domain.Aggregates.UserAggregate;
+using UserPermissionSystem.Domain.Aggregates.RoleAggregate;
 
 namespace UserPermissionSystem.Infrastructure.Persistence
 {
@@ -10,8 +12,8 @@ namespace UserPermissionSystem.Infrastructure.Persistence
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
+        public DbSet<Domain.Aggregates.UserAggregate.User> Users { get; set; }
+        public DbSet<Domain.Aggregates.RoleAggregate.Role> Roles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
@@ -29,10 +31,16 @@ namespace UserPermissionSystem.Infrastructure.Persistence
                 .HasKey(p => p.Code);
 
             // 配置User实体
-            modelBuilder.Entity<User>()
+            modelBuilder.Entity<Domain.Aggregates.UserAggregate.User>()
                 .Property(u => u.PasswordHash)
                 .HasColumnName("PasswordHash")
                 .IsRequired();
+                
+            // 设置用户聚合根的表名
+            modelBuilder.Entity<Domain.Aggregates.UserAggregate.User>().ToTable("Users");
+            
+            // 设置角色聚合根的表名
+            modelBuilder.Entity<Domain.Aggregates.RoleAggregate.Role>().ToTable("Roles");
 
             // 配置用户角色关联
             modelBuilder.Entity<UserRole>()

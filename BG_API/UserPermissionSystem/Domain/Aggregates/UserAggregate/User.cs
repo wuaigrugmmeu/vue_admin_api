@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UserPermissionSystem.Domain.AggregateModels;
 using UserPermissionSystem.Domain.Events;
 using UserPermissionSystem.Domain.Exceptions;
 using UserPermissionSystem.Domain.ValueObjects;
+using UserPermissionSystem.Domain.Entities;
 
-namespace UserPermissionSystem.Domain.Entities
+namespace UserPermissionSystem.Domain.Aggregates.UserAggregate
 {
     public class User : Entity, IAggregateRoot
     {
         private Password _password;
 
-        // 移除重复的Id、CreatedAt和UpdatedAt属性，这些已在BaseEntity中定义
         public string UserName { get; private set; }
         public string PasswordHash 
         { 
@@ -140,6 +141,21 @@ namespace UserPermissionSystem.Domain.Entities
             _userRoles.Add(new UserRole { UserId = Id, RoleId = role.Id, Role = role });
             
             AddDomainEvent(new UserRoleAssignedDomainEvent(Id, role.Id));
+        }
+
+        // 分配角色（通过角色ID）
+        public void AssignRoleById(int roleId)
+        {
+            if (_userRoles.Any(ur => ur.RoleId == roleId))
+                return; // 已经分配了该角色
+
+            _userRoles.Add(new UserRole
+            {
+                UserId = Id,
+                RoleId = roleId
+            });
+
+            AddDomainEvent(new UserRoleAssignedDomainEvent(Id, roleId));
         }
 
         // 移除角色

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using UserPermissionSystem.Infrastructure.Persistence;
 using UserPermissionSystem.DTOs;
 using UserPermissionSystem.Domain.Entities;
+using UserPermissionSystem.Domain.Aggregates.RoleAggregate;
 
 namespace UserPermissionSystem.Controllers
 {
@@ -112,8 +113,8 @@ namespace UserPermissionSystem.Controllers
                 return BadRequest(new { message = "角色名已存在" });
             }
 
-            // 使用Role实体的工厂方法创建新角色
-            var role = Role.Create(
+            // 使用聚合根的工厂方法创建新角色
+            var role = Domain.Aggregates.RoleAggregate.Role.Create(
                 createRoleDto.Name,
                 createRoleDto.Description
             );

@@ -12,11 +12,22 @@ namespace UserPermissionSystem.Infrastructure.Persistence
     {
         protected readonly DbContext _context;
         protected readonly DbSet<TEntity> _dbSet;
+        protected readonly IUnitOfWork _unitOfWork;
 
         public Repository(DbContext context)
         {
             _context = context;
             _dbSet = context.Set<TEntity>();
+            
+            // 如果传入的 context 实现了 IUnitOfWork 接口，则将其赋值给 _unitOfWork
+            if (context is IUnitOfWork unitOfWork)
+            {
+                _unitOfWork = unitOfWork;
+            }
+            else if (context is AppDbContext appDbContext)
+            {
+                _unitOfWork = new UnitOfWork(appDbContext);
+            }
         }
 
         public async Task<TEntity> GetByIdAsync(object id)

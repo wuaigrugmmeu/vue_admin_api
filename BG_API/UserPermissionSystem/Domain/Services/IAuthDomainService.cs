@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using UserPermissionSystem.Domain.Entities;
+using UserPermissionSystem.Domain.Aggregates.UserAggregate;
 
 namespace UserPermissionSystem.Domain.Services
 {

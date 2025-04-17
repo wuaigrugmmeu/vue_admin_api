@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using UserPermissionSystem.Domain.Entities;
+using UserPermissionSystem.Domain.Aggregates.UserAggregate;
 using UserPermissionSystem.Domain.Interfaces;
 using UserPermissionSystem.Domain.Services;
 using UserPermissionSystem.Infrastructure.Authentication;
@@ -18,12 +18,12 @@ namespace UserPermissionSystem.Infrastructure.Services
 {
     public class AuthDomainService : IAuthDomainService
     {
-        private readonly IRepository<User> _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly AppDbContext _dbContext;
         private readonly JwtSettings _jwtSettings;
 
         public AuthDomainService(
-            IRepository<User> userRepository,
+            IUserRepository userRepository,
             AppDbContext dbContext,
             IOptions<JwtSettings> jwtSettings)
         {
@@ -37,37 +37,11 @@ namespace UserPermissionSystem.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(password))
                 return null;
 
-            // 获取用户
-            var userDto = await _dbContext.Users
-                .AsNoTracking()
-                .Where(u => u.UserName == userName && u.IsActive)
-                .Select(u => new 
-                {
-                    u.Id,
-                    u.UserName,
-                    u.PasswordHash,
-                    u.Email,
-                    u.IsActive,
-                    u.CreatedAt,
-                    u.UpdatedAt,
-                    u.DisplayName,
-                    u.PhoneNumber
-                })
-                .FirstOrDefaultAsync();
-
-            if (userDto == null)
+            // 使用专用的用户仓储接口查询
+            var user = await _userRepository.FindByUserNameAsync(userName);
+            
+            if (user == null || !user.IsActive)
                 return null;
-
-            var user = User.Load(
-                userDto.Id,
-                userDto.UserName,
-                userDto.PasswordHash,
-                userDto.Email,
-                userDto.IsActive,
-                userDto.CreatedAt,
-                userDto.UpdatedAt,
-                userDto.DisplayName,
-                userDto.PhoneNumber);
 
             // 验证密码
             return user.VerifyPassword(password) ? user : null;
@@ -113,17 +87,9 @@ namespace UserPermissionSystem.Infrastructure.Services
 
         public async Task<string[]> GetUserPermissionsAsync(int userId)
         {
-            // 获取用户的所有权限（通过角色）
-            var permissions = await _dbContext.UserRoles
-                .Where(ur => ur.UserId == userId)
-                .Join(_dbContext.RolePermissions,
-                    ur => ur.RoleId,
-                    rp => rp.RoleId,
-                    (ur, rp) => rp.PermissionCode)
-                .Distinct()
-                .ToArrayAsync();
-
-            return permissions;
+            // 使用专用仓储获取用户权限
+            var permissions = await _userRepository.GetUserPermissionsAsync(userId);
+            return permissions.ToArray();
         }
 
         public async Task<bool> ValidateUserPasswordAsync(int userId, string password)
@@ -131,7 +97,7 @@ namespace UserPermissionSystem.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(password))
                 return false;
             
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null || !user.IsActive)
                 return false;
                 
@@ -143,18 +109,20 @@ namespace UserPermissionSystem.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
                 return false;
                 
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null || !user.IsActive)
                 return false;
-                
-            if (!user.VerifyPassword(currentPassword))
-                return false;
-                
-            // 使用User类的SetPassword方法，它会内部处理UpdatedAt属性
-            user.SetPassword(newPassword);
             
-            await _dbContext.SaveChangesAsync();
-            return true;
+            try
+            {
+                user.ChangePassword(currentPassword, newPassword);
+                await _userRepository.UnitOfWork.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
         
         public async Task<bool> ResetPasswordAsync(int userId, string newPassword)
@@ -162,14 +130,14 @@ namespace UserPermissionSystem.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(newPassword))
                 return false;
                 
-            var user = await _dbContext.Users.FindAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 return false;
                 
             // 使用User类的ResetPassword方法，它会内部处理UpdatedAt属性
             user.ResetPassword(newPassword);
             
-            await _dbContext.SaveChangesAsync();
+            await _userRepository.UnitOfWork.SaveChangesAsync();
             return true;
         }
     }

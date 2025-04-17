@@ -12,12 +12,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using UserPermissionSystem.Application.Interfaces;
-using UserPermissionSystem.Infrastructure.Services;
+using UserPermissionSystem.Application.Services;
 using UserPermissionSystem.Domain.Interfaces;
 using UserPermissionSystem.Domain.Services;
+using UserPermissionSystem.Domain.Aggregates.UserAggregate;
+using UserPermissionSystem.Domain.Aggregates.RoleAggregate;
 using UserPermissionSystem.Infrastructure.Authentication;
+using UserPermissionSystem.Infrastructure.Caching;
 using UserPermissionSystem.Infrastructure.Persistence;
 using UserPermissionSystem.Infrastructure.Seeders;
+using UserPermissionSystem.Infrastructure.Services;
 
 namespace UserPermissionSystem
 {
@@ -65,6 +69,11 @@ namespace UserPermissionSystem
                 });
             });
 
+            // 配置缓存服务
+            builder.Services.AddMemoryCache();
+            builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
+            builder.Services.AddSingleton<CacheManager>();
+
             // 配置JWT认证
             var jwtSettings = builder.Configuration.GetSection("JwtSettings");
             builder.Services.Configure<JwtSettings>(jwtSettings);
@@ -94,6 +103,10 @@ namespace UserPermissionSystem
             builder.Services.AddScoped<DbContext, AppDbContext>();
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            
+            // 注册专用仓储
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
             // 注册应用层服务
             builder.Services.AddScoped<IAuthDomainService, AuthDomainService>();
@@ -181,7 +194,8 @@ namespace UserPermissionSystem
 
                 // 自定义Swagger文档顺序，把认证相关接口放在最前面
                 c.OrderActionsBy(apiDesc =>
-                    apiDesc.ActionDescriptor.RouteValues["controller"].Equals("Auth", StringComparison.OrdinalIgnoreCase) ? "0" :
+                    apiDesc.ActionDescriptor.RouteValues.TryGetValue("controller", out var controller) && 
+                    controller?.Equals("Auth", StringComparison.OrdinalIgnoreCase) == true ? "0" :
                     apiDesc.ActionDescriptor.RouteValues["controller"]);
             });
         }

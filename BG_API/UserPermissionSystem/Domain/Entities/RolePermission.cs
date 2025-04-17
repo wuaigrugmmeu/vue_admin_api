@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using UserPermissionSystem.Domain.Aggregates.RoleAggregate;
 
 namespace UserPermissionSystem.Domain.Entities
 {
