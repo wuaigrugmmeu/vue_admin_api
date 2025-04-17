@@ -1,0 +1,45 @@
+# .NET Core 构建输出
+bin/
+obj/
+
+# Visual Studio 缓存/选项目录
+.vs/
+
+# Visual Studio 代码的文件夹设置
+.vscode/
+
+# 用户特定文件
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# 发布文件
+**/publish/
+
+# MSTest 测试结果
+TestResults/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# SQLite 数据库文件 (可选，如果想要忽略开发数据库)
+# *.db
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.swp
+*~
+
+# 其他常见的忽略项
+*.DS_Store
+Thumbs.db

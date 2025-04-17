@@ -2990,19 +2990,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/pengjie/.nuget/packages/": {}
+    "/home/codespace/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/pengjie/Dev/vue_admin_api-main/BG_API/UserPermissionSystem/UserPermissionSystem.csproj",
+      "projectUniqueName": "/workspaces/vue_admin_api/BG_API/UserPermissionSystem/UserPermissionSystem.csproj",
       "projectName": "UserPermissionSystem",
-      "projectPath": "/Users/pengjie/Dev/vue_admin_api-main/BG_API/UserPermissionSystem/UserPermissionSystem.csproj",
-      "packagesPath": "/Users/pengjie/.nuget/packages/",
-      "outputPath": "/Users/pengjie/Dev/vue_admin_api-main/BG_API/UserPermissionSystem/obj/",
+      "projectPath": "/workspaces/vue_admin_api/BG_API/UserPermissionSystem/UserPermissionSystem.csproj",
+      "packagesPath": "/home/codespace/.nuget/packages/",
+      "outputPath": "/workspaces/vue_admin_api/BG_API/UserPermissionSystem/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/pengjie/.nuget/NuGet/NuGet.Config"
+        "/home/codespace/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -3083,7 +3083,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.407/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
